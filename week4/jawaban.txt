@@ -1,0 +1,48 @@
+1. Apa itu IPC? 
+> IPC adalah suatu cara untuk proses/program saling berkomunikasi 
+
+2. Bagaimana caranya proses berkomunikasi?
+> cara proses berkomunikasi adalah melalui alat komunikasi antar proses yang dinamakan PIPE, dan juga SHARED MEMORY yang berarti menggunakan memori yang sama untuk berkomunikasi antara 2 program tersebut.
+
+3. Jelaskan 2 jenis pipe
+> UNNAMED PIPE : pipe yang tidak mempunyai nama, tidak terlihat di file system, dan eksistansinya hanya sementara, dan juga komunikasinya hanya antara parents dan child. Unnamed pipe terkhusus untuk proses yang dibuat bersamaan (FORK), jadi tidak bisa dipakai oleh semabarang proses.
+> NAMED PIPE : pipe ini mempunyai nama, terlihat di file system, dan bisa dipakai proses yang tidak saling kenal. Pipe ini akan muncul seperti file biasa, tapi ukurannya 0 karena sebenarnya hanya buffer di memory.
+
+4. Jelaskan konsep dari FIFO
+> FIFO (first-in first-out) : Dalam named pipe, setiap program akan berjalan secara berurutan, dari yang paling pertama, sampai paling terakhir.
+
+5. Apa itu shared memory
+> Sebuah memory yang bisa dipakai dan diakses secara bersamaan oleh banyak proses sekaligus
+
+6. Apa itu race condition
+> Sebuah kondisi yang dapat terjadi jika ada 2 proses yang menulis secara bersamaan
+
+7. Ketika wrfifo dan rdfifo dijalankan, apa yang terjadi? Tuliskan kesimpulan dari kedua program
+> Ketika rdfifo dijalankan, ia akan membuat named pipe bernama fifo1, lalu membacanya dalam mode read-only, setelah itu akan menampilkannya ke layar
+> Setelah itu wrfifo baru dijalankan, dia akan mengirim data melalui fifo, dengan cara membuka fifo1 dala mode write only.
+
+8. Apa itu AGRC dan AGRV[]?
+> ARGC (Argument Count) : Menyimpan jumlah argumen yang dimasukkan saat program dijalankan di terminal, termasuk nama programnya sendiri
+> ARGV (Argument Vector) : Array of string yang menyimpan isi argumen yang dimasukkan
+./program hello world maka
+argv[0] = "./program"
+argv[1] = "hello"
+argv[2] = "world"
+
+9. Bagaimana caranya menghapus shared memory?
+> Menggunakan shmctl() yang ada di shmerase.c, lalu dirun programnya, dan pilih shared memory id mana yang mau dihapus
+
+10. Apa yang terjadi di shmdemo_varian.c? Tuliskan kesimpulan apabila ftok diganti
+> Ketika shmdemo_varian.c dijalankan, program tersebut akan berjalan persis seperti shmdemo, namun bedanya shmdemo_varian berjalan di shared memory yang berbeda, karena key ftok sudah diganti. Kesimpulannya adalah, perubahan sekecil apapun di bagian ftok, akan memutus koneksi antar proses tersebut.
+
+11. Apa fungsi IPCRM-M
+> ipcrm berfungsi untuk menghapus shared memory dari sistem berdasarkan shm id yang dipilih untuk dihapus.
+
+12. Di program shmrace.c, apa yang terjadi jika dijalankan berulang kali?
+> Setiap kali dijalankan, output di terminal akan kacau dan bercampur antara print dari parent dan child. Nilai yang dicetak tidak selalu urut dan tidak konsisten di setiap run.
+
+13. Apa hasilnya konsisten/sama setiap kali dijalankan? Apa hasil yang seharusnya diharapkan?
+> Tidak konsisten. Nilai akhir *ptrData bisa bermacam-macam setiap dijalankan, hasil yang seharusnya diharapkan adalah 200.000, karena parent loop 100.000 kali increment dan child loop 100.000 kali increment
+
+14. Jelaskan mengapa bisa terjadi hasil yang didapatkan
+> Hal ini bisa terjadi karena race condition, operasi (*ptrData)++ adalah satu instruksi, tapi CPU menjalankannya dalam 3 langkah terpisah, karena parent dan child berjalan hampir bersamaan
