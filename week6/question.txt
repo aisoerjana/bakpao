@@ -1,0 +1,56 @@
+PERTANYAAN
+1.Apa itu deadlock, livelock, dan starvation
+a. Deadlock   : adalah kondisi ketika 2 atau lebih proses saling menunggu resource yang dimiliki proses lain, sehingga tidak ada proses yang jalan
+b. Livelock   : Livelock mirip deadlock, bedanya proses aktif berjalan walaupun tidak pernah selesai tujuannya. Jadi seperti menjalankan suatu proses yang sia-sia.
+c. Starvation : adalah suatu kondisi dimana ada proses yang tidak pernah mendapatkan resource dikarenakan antriannya selalu direbut oleh proses lain. Hal ini dapat terjadi karena proses yang memiliki prioritas rendah selalu kalah dengan proses prioritas tinggi.
+
+2.Mengapa di program prak6-1 hasilnya wrong? Gimana cara
+memperbaikinya?
+= Hasilnya wrong karena terjadi race condition antara pthread1 dan pthread2, dan cara memperbaikinya adalah dengan menambahkan mutex
+
+3.Di program prak6-2.c, does the program seem slower when run?
+= Iya, program lebih lama ketika dijalankan (ada delaynya)
+
+4.Di program prak6-2.c, What happens if pthread_mutex_lock() is run
+twice consecutively?
+= Program akan langsung terjadi deadlock, karena thread tersebut akan mengunci dirinya sendiri padahal di awal sudah dilock oleh dirinya.
+
+5.Di program prak6-2.c, What happens if pthread_mutex_unlock() is not
+included?
+= Thread2 akan menunggu selamanya (deadlock), karena tidak ada perintah unlock
+
+6.Apa perbedaan Mutex dan Semaphore dengan implementasi Mutex?
+= Pada mutex, sistem kepemilikannya hanya thread yang mengunci yang boleh membuka, sedangkan pada semaphore, siapa saja boleh membuka. 
+
+Implementasi mutex di kode ini menggunakan PTHREAD_MUTEX_INITIALIZER untuk inisialisasi statis, lalu pthread_mutex_lock() sebelum critical region dan pthread_mutex_unlock() setelahnya, untuk memastikan hanya satu thread yang bisa increment cnt di satu waktu
+
+7.Di prak6-2 dan prak6-2-busy, apa perbedaan yang terjadi?
+a. prak6-2 menggunakan pthread_mutex_lock, kalau mutex lagi dikunci, thread yang menunggu akan tidur (sleep/block), dikeluarkan dari CPU, dan di wake up lagi oleh OS ketika mutex sudah tersedia. Ini disebut blocking wait
+b. prak6-2-busy menggunakan pthread_mutex_trylock() dalam while loop, jadi kalo mutex lagi dikunci, threadnya tidak tidur, tapi dia akan terus-menerus mencoba lock tanpa henti. CPU terus bekerja penuh walaupun gak ada kemajuan. Ini disebut busy waiting
+
+Konsekuensinya: prak6-2-busy mengonsumsi CPU jauh lebih boros, tapi latensi response-nya bisa lebih rendah karena tidak ada overhead context-switch dari OS.
+
+8.If pthread_mutex_unlock() is not included in prak6-2-busy.c, will the
+program still run? Will the program complete? What is the name of this
+phenomenon?
+= Programnya tetep bisa jalan, tapi tidak akan pernah selesai, fenomena ini disebut busy-waiting infinite loop, thread aktif bergerak tapi tidak ada kemajuan sama sekali
+
+9.Apa yang terjadi di prak6-3.c?
+= di prak6-3, program mengalami deadlock, 2 thread berjalan dengan urutan pengambilan mutex yang berlawanan, keduanya saling menunggu resource yang dipegang lawannya, sehingga tidak ada yang bisa jalan dan program macet selamanya.
+
+10.Di prak6-3.c, Apa yang terjadi di crtitcal region?
+= critical region tidak pernah tercapai karena terjadi kondisi deadlock terjadi sebelum kedua mutex berhasil dikunci
+
+11.Di prak6-3.c, bagaimana cara menghindari deadlock?
+= ada 3 cara untuk menghindari deadlock
+a. Resource Hierarchy : memaksa semua thread selalu mengunci mutex dengan nomor lebih kecil terlebih dahulu
+b. Trylock dengan backoff : menggunakan pthread_mutex_trylock(), jika gagal mendapatkan mutex kedua, melepaskan mutex pertama dulu, tunggu sebentar, lalu coba lagi dari awal
+c. Semaphore : menggunakan semaphore agar hanya 1 thread yang boleh masuk untuk mengambil resource di satu waktu
+
+12.Jelaskan cara penggunaan semaphore dalam perbaikannya
+= Menggunakan 4 semaphore, resource_A, resource_B (berperan seperti mutex untuk resource), dan turn_1, turn_2 (sebagai token giliran). Dengan token giliran, thread 1 dan thread 2 tidak pernah mengambil resource secara bersamaan, sehingga deadlock tidak akan terjadi
+ 
+13.Apa yang tejadi di practice.c
+= pada practice.c yang asli, disimulasikan dining philosophers problem, 5 philosopher duduk melingkar, masing-masing butuh 2 fork untuk makan, dan setiap fork hanya bisa dipegang 1 philosopher. Namun pada kode asli berpotensi deadlock, semua philosopher ambil fork kiri dulu secara bersamaan, masing-masing pegang 1 fork dan menunggu fork kanan, akhirnya tidak ada yang bisa makan( circular wait -> deadlock).
+
+= pada practice.c yang sudah diperbaiki, setiap philosopher selalu ambil fork dengan nomor lebih keceil terlebih dahulu
