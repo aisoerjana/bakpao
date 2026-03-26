@@ -1,0 +1,44 @@
+1. Program ini membuat semaphore dengan nilai awal 1, lalu melakukan loop sebanyak 10 kali. Di setiap loop program mencetak nilai semaphore saat ini, lalu memanggil sem_wait() untuk mengurangi nilainya. Program berakhir freeze karena tidak ada sem_post() yang menaikkan nilainya kembali.
+
+2. Program ini mirip dengan praksem1, tetapi bedanya sudah ditambahkan sem_post(), hasilnya adalah di setiap loop: sem_wait() menurunkan nilai semaphore dari 1 ke 0, lalu langsung dinaikkan kembali oleh sem_post(). Karena nilai semaphore selalu dikembalikan menjadi 1 di setiap loop, program berhasil menyelsaikan semua 10 loop dengan lancar. Output yang dicetak selalu semaphore_value = 1 sebanyak 10 kali.
+
+3. Program ini membuat 2 thread, task1 dan task2 yang berjalan secara bergantian menggunakan 2 semaphore. task1 berfungsi untuk menaikkan variabel global g1 lalu diprint, dan setiap g1 habis dibagi 5, task1 memberi sinyal ke task2 lewat sem_post(&semid2). task2 akan aktif ketika menerima sinyal dari task1 dengan sem_wait(&semid1), lalu akan print nilai g1 saat itu. Proses ini berulang terus sampai g1 mencapai 500
+
+4. Proses sinkronisasi bekerja seperti sistem ping-pong antara 2 thread, kedua semaphore (semid1 dan semid2_ diinisialisasi dengan nilai 0, keduanya langsung blokir siapa saja yang memanggil sem_wait di awal. Proses sinkronisasi ini memastikan task2 hanya berjalan di saat yang tepat yaitu setiap g1 kelipatan 5, dan tidak ada yang berjalan bersamaan di antara keduanya.
+
+5. Pada praksem3, dibuat 2 proses parent & child yang memanggil fork(), keduanya berjalan secara paralel dan mengakses shared memory yang sama.
+
+6. variabel dan resources yang diakses terus-menerus adalah *ptr, dan operasi yang dilakukan adalah ++(*ptr) sebanyak 500.000 kali oleh masing-masing proses.
+
+7. Pada praksem3, parent dan child process sama-sama melakukan loop 500.000 kali, dimana setiap proses looping itu keduanya menaikkan nilai *ptr di shared memory lalu mencetaknya. Karena keduanya berjalan secara paralel tanpa ada sinkronisasi, keduanya bisa mengakses dan mengubah *ptr di saat yang bersamaan. 
+
+8. Ya, terjadi race condition, karena operasi ++(*ptr) dijalankan oleh 2 proses secara bersamaan
+
+9. Perbedaannya ada di sem_wait() dan sem_post() di operasi ++(*ptr) untuk mencegah race condition, sehingga nilai akhir *ptr sudah pasti tepat 1.000.000.
+
+10.Atomic operation adalah operasi yang diekseskusi secara penuh atau tidak sama sekali, operasi ini tidak bisa dipotong atau diselingi oleh proses lain di tengah-tengah eksekusinya. 
+-> contoh :  sem_wait dan sem_post() adalah atomic, sehingga aman digunakan untuk sinkronisasi
+
+11. Kedua program ini adalah contoh komunikasi antara 2 proses menggunakan shared memory dan semaphore. Server bertugas untuk mengirim data, server membuat shared memory dan semaphore bernama "mysem", lalu mengisi shared memory dengan karakter 'A' sampai 'Z' satu per satu. 
+
+12. Program semaphore mutex digunakan karena server dan client bisa saja berjalan secara bersamaan lalu mengakses shared meomry di waktu yang sama. Sehingga adanya kemungkinan dimana server sedang menulis karakter sementara client sudah mulai membaca, sehingga client bisa mendapat data yang belum lengkap. 
+
+13. Server menunggu client menggunakan looping while
+while(*shm != '*') {
+    sleep(1);
+}
+Server terus mengecek isi awal shared memory setiap 1 detik. selama nilainya belum berubah menjadi "*" maka server tetap menunggu. 
+
+14. di rc_week3, race condition dicegah dengan menggunakan pthread mutex. Mutex diinisialisasi secara global dengan PTHREAD_MUTEX_INITIALIZER, lalu di setiap looping, sebelum mengakses variabel cnt dipanggil phtread_mutex_lock untuk mengunci akses, dan setelah selesai dipanggil pthread_mutex_unlock untuk membuka kuncinya kembali. Sistem ini mirip seperti kamar ganti yang bergantian.
+
+15. Critical Region adalah bagian kode dimana proses atau thread mengakses resource yang sedang dipakai bersamaan, dan jika 2 thread masuk ke bagian ini secara bersamaan maka bisa terjadi race condition. Di program ini yang termasuk critical region adalah:
+
+pthread_mutex_lock(&mutex);
+cnt++; // ini critical region
+pthread_mutex_unlock(&mutex); 
+
+16. Semaphore dan pthread mutex sebenarnya sama-sama digunakan untuk sinkronisasi, tapi  keduanya berbeda
+
+Mutex : hanya thread yang mengunci mutex yang boleh membukanya kembali. Mutex cocok untuk melindungi critical region dalam satu proses yang menggunakan banyak thread.
+
+Semaphore : lebih fleksibel, karena nilainya bisa lebih dari 1, jadi bisa mengizinkan beberapa proses masuk ke critical section sekaligus. Semaphore juga bisa siapa aja yang mengunci dan siapa aja yang membuka, tidak se-ketat mutex. Semaphore cocok untuk sinkronisasi antara proses berbeda seperti di praksem3
