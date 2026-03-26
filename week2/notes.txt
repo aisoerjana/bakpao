@@ -1,0 +1,17 @@
+PRACTICUM 2.1
+	1. Program akan melakukan pengulangan/looping
+	2. Program saya berjalan, berdasarkan informasi dari command "top", dengan PID : 7720
+	3. PID berubah & PPID tidak berubah
+	4. proses yang memiliki PPID sama dengan PID program di atas adalah child process yang dibuat oleh fork()
+	5. Jika PID sudah terpakai semua, sistem tidak akan bisa membaut proses baru dan fork() akan gagal. Tetapi biasanya hal seperti ini tidak akan terjadi, karena ketika suatu proses selesai, PID akan dipakai ulang lagi
+
+PRACTICUM 2.2
+	1. Outputnya adalah "hello!" beserta dengan nomor PID dan PPIDnya. Ada 8 line yang keluar. Karena setiap fork mempunyai 1 parent dan 1 child, dan perhitungan fork adalah 2^n, untuk n = fork(), dikarenakan ada 3 fork, maka 2^3 = 8.
+	2. Karena perhitungan fork() adalah 2^n, maka fork yang diproses akan sebanyak perhitungan 2^n kali. Bentuk hierarchynya akan berbentuk seperti pohon, fork() akan menjalankan setiap proses yang ada, dan fork() bersifat race condition, sehingga proses yang dijalankan tidak berurut.
+	3. Perubahan di variable X dipengaruhi oleh childPID
+	4. Jika childPID diubah menjadi 3000, maka childPID tidak akan pernah menghasilkan kondisi 0, dan akan selalu mengerjakan statement dari parentnya.
+	5. Tidak benar, akan selalu ada 2 proses, parent dan child. Yang dimana parent akan memanggil fork() dan memiliki nilai fork() lebih dari 0, dan child sendiri adalah proses dari fork() yang dijalankan oleh parent, child sendiri memiliki nilai fork() = 0 dan nomor PPID-nya akan mengarah ke PID dari parent.
+	
+PRACTICUM 2.3
+	1. Setelah saya coba buat menggunakan infinite loop, ketika dijalankan programnya, yang keluar adalah child PID = 4816 dan child PPID = 4815. Program masih terus berjalan dan saat diliat di top, yang muncul hanya 1 yaitu PID dari child.
+	2. Ketika saya coba kill -9 4816, pada 'top' PID berubah menjadi parent PID 4815 dan program ngeprint parent PID = 4815 dan parent PPID = 4308, child exited with 9. Dalam kejadian ini, setelah child dikill, parent process menerima status bahwa child sudah dikill, sehingga tidak muncul zombie.
